@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const {createSlug} = require('../utils.js');
 
 const index = async (req, res, next) => {
     let { published, word } = req.query;
@@ -36,13 +37,34 @@ const index = async (req, res, next) => {
             success: true,
             data: posts,
         });
-    } catch (err) {
-        next(err);
+    } catch (error) {
+        next(error);
     }
 };
 
 const store = async (req, res, next) => {
 
+    try {
+        const { title, content, published, image } = req.body;
+        const posts = await prisma.post.findMany();
+        const data = {
+            title,
+            slug: createSlug(title, posts),
+            content,
+            published,
+            image
+        }
+
+        const newPost = await prisma.post.create({ data });
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            newPost,
+        })
+    } catch (error) {
+        next(error)
+    }
 };
 
 const show = async (req, res, next) => {
