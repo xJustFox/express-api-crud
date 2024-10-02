@@ -76,7 +76,7 @@ const show = async (req, res, next) => {
         res.status(200).json({
             status: 200,
             success: true,
-            foundPost,
+            found_post: foundPost,
         })
     } catch (error) {
         next(error)
@@ -84,7 +84,21 @@ const show = async (req, res, next) => {
 };
 
 const update = async (req, res, next) => {
-    
+    try {
+        const {slug} = req.params;
+
+        const updatedPost = await prisma.post.update({
+            where: {slug},
+            data: req.body
+        })
+        res.status(200).json({
+            status: 200,
+            success: true,
+            updated_post: updatedPost,
+        })
+    } catch (error) {
+        next(error)
+    }
 };
 
 const destroy = async (req, res, next) => {
