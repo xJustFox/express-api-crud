@@ -5,8 +5,8 @@ const {  index, store, show,  update, destroy } = require('../controllers/postsC
 
 router.get('/', index);
 router.post('/', store);
-router.get('/:id', show);
-router.put('/:id', update);
-router.delete('/:id', destroy);
+router.get('/:slug', show);
+router.put('/:slug', update);
+router.delete('/:slug', destroy);
 
 module.exports = router;
