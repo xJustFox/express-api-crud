@@ -3,7 +3,7 @@ const prisma = new PrismaClient();
 const { createSlug } = require('../utils.js');
 
 const index = async (req, res, next) => {
-    let { published, word } = req.query;
+    let { published, word, page = 1, limit = 5} = req.query;
 
     if (published === 'true') {
         published = true;
@@ -18,9 +18,24 @@ const index = async (req, res, next) => {
         title: { contains: word },
         content: { contains: word }
     }
-
+    
+    const offset = (page - 1) * limit;
+    const totalItems = await prisma.post.count({where});
+    const totalPages = Math.ceil(totalItems / limit);
+    
+    if (page > totalPages) {
+        res.status(404).json({
+            status: 404,
+            success: false,
+            message: 'Page not exist',
+        })
+    }
     try {
-        const posts = await prisma.post.findMany({ where });
+        const posts = await prisma.post.findMany({ 
+            where,
+            take: parseInt(limit),
+            skip: parseInt(offset)
+         });
 
         const count = parseInt(posts.length);
         if (count === 0) {
@@ -36,6 +51,9 @@ const index = async (req, res, next) => {
             status: 200,
             success: true,
             data: posts,
+            page,
+            totalPages,
+            totalItems
         });
     } catch (error) {
         next(error);
